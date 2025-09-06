@@ -1,0 +1,219 @@
+/* Bilgi penceresi (feature popup) için modern kart tasarýmý */
+.coord-popup {
+    position: absolute;
+    left: 30px;
+    bottom: 30px;
+    background: #fff;
+    color: #23272f;
+    border: none;
+    border-radius: 16px;
+    padding: 22px 28px;
+    font-size: 1.1em;
+    z-index: 20;
+    box-shadow: 0 8px 32px rgba(51,153,255,0.18), 0 1.5px 8px rgba(0,0,0,0.08);
+    min-width: 320px;
+    max-width: 400px;
+    transition: box-shadow 0.2s;
+    animation: popupIn 0.25s;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+    .coord-popup b {
+        color: #3399ff;
+        font-weight: 600;
+    }
+
+    .coord-popup span {
+        color: #555;
+        font-size: 1em;
+    }
+
+    .coord-popup button {
+        align-self: flex-end;
+        background: #ff3333;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 18px;
+        font-size: 1em;
+        cursor: pointer;
+        margin-top: 8px;
+        box-shadow: 0 2px 8px rgba(255,51,51,0.10);
+        transition: background 0.2s;
+    }
+
+        .coord-popup button:hover {
+            background: #c62828;
+        }
+
+/* Navbar ve genel site görünümü için iyileþtirmeler */
+body {
+    background: linear-gradient(135deg, #f8fafc 0%, #e3f0ff 100%);
+    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.navbar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    align-items: center;
+    background: #23272f;
+    padding: 18px 40px;
+    border-radius: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    justify-content: center;
+}
+
+    .navbar button, .navbar select {
+        background: #3399ff;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 22px;
+        font-size: 1.05rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.2s, box-shadow 0.2s;
+        margin-right: 4px;
+    }
+
+    .navbar .selected {
+        background: #ffb300;
+        color: #23272f;
+        box-shadow: 0 2px 8px rgba(255,179,0,0.15);
+        font-weight: 700;
+        border: 2px solid #ffb300;
+    }
+
+    .navbar button:hover, .navbar select:hover {
+        background: #2677c9;
+        box-shadow: 0 2px 8px rgba(51,153,255,0.15);
+    }
+
+    .navbar select {
+        background: #fff;
+        color: #23272f;
+        border: 1px solid #3399ff;
+        font-weight: 500;
+        margin-left: 12px;
+        padding: 9px 18px;
+        border-radius: 8px;
+    }
+
+        .navbar select:focus {
+            outline: 2px solid #3399ff;
+        }
+
+/* Filtre kutularý için iyileþtirme */
+input, select {
+    border-radius: 8px;
+    border: 1.5px solid #3399ff;
+    padding: 8px 14px;
+    font-size: 1em;
+    margin-bottom: 2px;
+    background: #f8fafc;
+    transition: border 0.2s;
+}
+
+    input:focus, select:focus {
+        border: 2px solid #ffb300;
+        outline: none;
+    }
+
+/* Map container için daha modern görünüm */
+.map-container {
+    width: 100%;
+    height: 500px;
+    border: 2.5px solid #3399ff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(51,153,255,0.10);
+    position: relative;
+    background: #f8fafc;
+    margin-bottom: 24px;
+}
+
+/* Liste popup ve diðer paneller için iyileþtirme */
+.popup-panel {
+    position: fixed;
+    top: 80px;
+    right: 40px;
+    width: 340px;
+    background: #fff;
+    border: none;
+    border-radius: 14px;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    animation: popupIn 0.2s;
+}
+
+.popup-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #3399ff;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 14px 14px 0 0;
+    font-size: 1.1em;
+    font-weight: 600;
+}
+
+.popup-content {
+    padding: 18px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.close-btn {
+    background: #ff3333;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    font-size: 1em;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(255,51,51,0.10);
+    transition: background 0.2s;
+}
+
+    .close-btn:hover {
+        background: #c62828;
+    }
+
+.goto-btn {
+    margin-left: 10px;
+    background: #3399ff;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 0.95em;
+    box-shadow: 0 2px 8px rgba(51,153,255,0.10);
+    transition: background 0.2s;
+}
+
+    .goto-btn:hover {
+        background: #2677c9;
+    }
+
+li {
+    margin-bottom: 10px;
+    font-size: 1.05em;
+    color: #23272f;
+}
+
+@keyframes popupIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
