@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+ï»¿import React, { useEffect, useRef, useState } from 'react';
 import 'ol/ol.css';
 import Map from 'ol/Map';
 import View from 'ol/View';
@@ -116,7 +116,7 @@ function App() {
         // eslint-disable-next-line
     }, []);
 
-    // Geometrileri backend'den çek
+    // Geometrileri backend'den Ã§ek
     const fetchGeometries = () => {
         setLoading(true);
         fetch(`${API_BASE}/GetGeometriesAll`)
@@ -131,39 +131,43 @@ function App() {
                             dataProjection: 'EPSG:4326',
                             featureProjection: 'EPSG:3857'
                         });
-                        feature.setId(g.id);
-                        feature.set('type', g.type.toLowerCase());
-                        feature.set('name', g.name);
+                        // Ã–zellikleri topluca ekle
+                        feature.setProperties({
+                            id: g.id,
+                            type: g.type.toLowerCase(),
+                            name: g.name
+                        });
+                        feature.setId(g.id); // OpenLayers'Ä±n id sistemine de ata (isteÄŸe baÄŸlÄ±)
                         vectorSource.current.addFeature(feature);
                     });
-                    // Polygonlarý birleþtir
-                    const polygons = data.data
-                        .filter(g => g.type.toLowerCase() === 'polygon')
-                        .map(g => wellknown.parse(g.wkt));
+                    //// PolygonlarÄ± birleÅŸtir
+                    //const polygons = data.data
+                    //    .filter(g => g.type.toLowerCase() === 'polygon')
+                    //    .map(g => wellknown.parse(g.wkt));
 
-                    let unionPoly = null;
-                    if (polygons.length === 1) {
-                        unionPoly = turf.polygon(polygons[0].coordinates);
-                    } else if (polygons.length > 1) {
-                        unionPoly = turf.polygon(polygons[0].coordinates);
-                        for (let i = 1; i < polygons.length; i++) {
-                            const nextPoly = turf.polygon(polygons[i].coordinates);
-                            unionPoly = turf.union(unionPoly, nextPoly);
-                        }
-                    }
+                    //let unionPoly = null;
+                    //if (polygons.length === 1) {
+                    //    unionPoly = turf.polygon(polygons[0].coordinates);
+                    //} else if (polygons.length > 1) {
+                    //    unionPoly = turf.polygon(polygons[0].coordinates);
+                    //    for (let i = 1; i < polygons.length; i++) {
+                    //        const nextPoly = turf.polygon(polygons[i].coordinates);
+                    //        unionPoly = turf.union(unionPoly, nextPoly);
+                    //    }
+                    //}
 
-                    // Birleþik polygonu ekle
-                    if (unionPoly) {
-                        const unionGeoJson = unionPoly.geometry;
-                        const unionWkt = wellknown.stringify(unionGeoJson);
-                        const unionFeature = wktFormat.readFeature(unionWkt, {
-                            dataProjection: 'EPSG:4326',
-                            featureProjection: 'EPSG:3857'
-                        });
-                        unionFeature.set('type', 'polygon');
-                        unionFeature.set('name', 'Birlesik Polygon');
-                        vectorSource.current.addFeature(unionFeature);
-                    }
+                    //// BirleÅŸik polygonu ekle
+                    //if (unionPoly) {
+                    //    const unionGeoJson = unionPoly.geometry;
+                    //    const unionWkt = wellknown.stringify(unionGeoJson);
+                    //    const unionFeature = wktFormat.readFeature(unionWkt, {
+                    //        dataProjection: 'EPSG:4326',
+                    //        featureProjection: 'EPSG:3857'
+                    //    });
+                    //    unionFeature.set('type', 'polygon');
+                    //    unionFeature.set('name', 'Birlesik Polygon');
+                    //    vectorSource.current.addFeature(unionFeature);
+                    //}
                 }
 
             })
@@ -179,7 +183,7 @@ function App() {
         if (map) map.render();
     }, [hoveredFeature, map]);
 
-    // Mod deðiþtiðinde interaction'larý güncelle
+    // Mod deÄŸiÅŸtiÄŸinde interaction'larÄ± gÃ¼ncelle
     useEffect(() => {
         if (!map) return;
 
@@ -235,34 +239,56 @@ function App() {
         } else if (mode === 'update') {
             const selectInteraction = new Select({ condition: click });
             const modifyInteraction = new Modify({ source: vectorSource.current });
-            let selectedFeature = null;
 
+            // Select ile seÃ§ilen feature'Ä± highlight etmek iÃ§in
             selectInteraction.on('select', (evt) => {
-                selectedFeature = evt.selected[0];
+                const feature = evt.selected[0];
+                if (feature) {
+                    // Featureâ€™a ID ve type set et
+                    if (!feature.getId() && feature.get('id')) feature.setId(feature.get('id'));
+                    if (!feature.get('type') && feature.get('type')) feature.set('type', feature.get('type'));
+                    console.log('SeÃ§ilen feature:', {
+                        id: feature.getId(),
+                        type: feature.get('type'),
+                        name: feature.get('name')
+                    });
+                }
             });
 
+            // Modify interaction bittiÄŸinde
             modifyInteraction.on('modifyend', (evt) => {
-                if (selectedFeature) {
+                evt.features.forEach((feature) => {
+                    const id = feature.getId();
+                    const type = feature.get('type');
+                    const nameOld = feature.get('name');
+
+                    if (!id || !type) {
+                        alert('Geometri ID veya tipi bulunamadÄ±!');
+                        return;
+                    }
+
                     const wktFormat = new WKT();
-                    const wkt = wktFormat.writeFeature(selectedFeature, {
+                    const wkt = wktFormat.writeFeature(feature, {
                         dataProjection: 'EPSG:4326',
                         featureProjection: 'EPSG:3857'
                     });
-                    const id = selectedFeature.getId();
-                    const type = selectedFeature.get('type');
-                    const name = prompt('Yeni isim giriniz:', selectedFeature.get('name') || '');
+
+                    const name = prompt('Yeni isim giriniz:', nameOld || '');
                     if (!name) return;
-                    fetch(`${API_BASE}/Update/${id}/${type}`, {
+
+                    fetch(`${API_BASE}/Update/${id}/${type.toLowerCase()}`, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             name: name,
                             wkt: wkt,
-                            type: type
+                            type: type.toLowerCase()
                         }),
                     }).then(() => fetchGeometries());
-                }
+                });
             });
+
+
 
             map.addInteraction(selectInteraction);
             map.addInteraction(modifyInteraction);
@@ -277,7 +303,7 @@ function App() {
         // eslint-disable-next-line
     }, [mode, drawType, map]);
 
-    // Liste popup'ýnda geometriye git
+    // Liste popup'Ä±nda geometriye git
     const flyToGeometry = (wkt) => {
         if (!map) return;
         const wktFormat = new WKT();
@@ -292,7 +318,7 @@ function App() {
         setPopupOpen(false);
     };
 
-    // Harita üzerinde feature týklama ile popup açma
+    // Harita Ã¼zerinde feature tÄ±klama ile popup aÃ§ma
     useEffect(() => {
         if (!map) return;
 
@@ -326,11 +352,11 @@ function App() {
             (filter.type === '' || g.type.toLowerCase() === filter.type.toLowerCase())
     );
 
-    // Harita üzerindeki feature'larý filtrele (sadece Sadece Görüntüle modunda)
+    // Harita Ã¼zerindeki feature'larÄ± filtrele (sadece Sadece GÃ¶rÃ¼ntÃ¼le modunda)
     useEffect(() => {
         if (!vectorSource.current) return;
         if (mode !== '') {
-            // Diðer modlarda tüm feature'lar görünsün
+            // DiÄŸer modlarda tÃ¼m feature'lar gÃ¶rÃ¼nsÃ¼n
             vectorSource.current.getFeatures().forEach(f => {
                 const type = (f.get('type') || '').toLowerCase();
                 f.setStyle(getGeometryStyle(type));
@@ -346,7 +372,7 @@ function App() {
             if (visible) {
                 f.setStyle(getGeometryStyle(type));
             } else {
-                // Boþ style ile görünmez yap
+                // BoÅŸ style ile gÃ¶rÃ¼nmez yap
                 f.setStyle(new Style({}));
             }
         });
@@ -394,7 +420,7 @@ function App() {
                     </select>
                 )}
             </nav>
-            {/* Filtre kutularý sadece Sadece Görüntüle modunda */}
+            {/* Filtre kutularÄ± sadece Sadece GÃ¶rÃ¼ntÃ¼le modunda */}
             {mode === '' && (
                 <div style={{ margin: '8px 0', display: 'flex', gap: 8 }}>
                     <input
